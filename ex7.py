@@ -326,9 +326,9 @@ def sort_owners_by_num_pokemon():
     for owner in owners_list:
         print(f"Owner: {owner['owner_original']} (has {len(owner['pokedex'])} Pokemon)")
 
-########################
+#######################
 # 6) Print All
-########################
+#######################
 
 def print_all_owners():
     while True:
