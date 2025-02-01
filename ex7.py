@@ -331,25 +331,27 @@ def sort_owners_by_num_pokemon():
 #######################
 
 def print_all_owners():
-    while True:
-        print("\n1) BFS")
-        print("2) Pre-Order")
-        print("3) In-Order")
-        print("4) Post-Order")
-        print("Your choice:", end=" ")
+    print("\n1) BFS")
+    print("2) Pre-Order")
+    print("3) In-Order")
+    print("4) Post-Order")
+    print("Your choice: ", end="")
 
-        choice = read_int_safe("")  # Ensuring input is captured correctly
+    choice = read_int_safe("")
 
-        if choice == 1:
-            bfs_traversal(ownerRoot)
-        elif choice == 2:
-            pre_order(ownerRoot)
-        elif choice == 3:
-            in_order(ownerRoot)
-        elif choice == 4:
-            post_order(ownerRoot)
-        else:
-            return  # Return to Main Menu if input is invalid
+    if choice == 1:
+        bfs_traversal(ownerRoot)
+    elif choice == 2:
+        pre_order(ownerRoot)
+    elif choice == 3:
+        in_order(ownerRoot)
+    elif choice == 4:
+        post_order(ownerRoot)
+    else:
+        print("Invalid input.")
+
+    # After printing, return to main menu
+    return
 
 def pre_order_print(node):
     if node is None:
@@ -519,7 +521,7 @@ def main_menu():
             print("Goodbye!")
             break
         else:
-            print("Invalid choice. Please enter a number between 1-6.")
+            print("Invalid choice.")
 
 def main():
     main_menu()
