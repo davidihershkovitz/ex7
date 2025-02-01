@@ -49,7 +49,7 @@ HOENN_DATA = read_hoenn_csv("hoenn_pokedex.csv")
 def read_int_safe(prompt):
     while True:
         user_input = input(prompt).strip()
-        if user_input.isdigit():  # Ensure input contains only nums
+        if user_input.isdigit():
             return int(user_input)
         print("Invalid input.")
 
@@ -57,8 +57,8 @@ def get_poke_dict_by_id(poke_id):
     for poke in HOENN_DATA:
         if poke["ID"] == poke_id:
             return poke.copy()
-    print(f"ID {poke_id} not found in Hoenn data.")
-    return None  # Ensure None is returned instead of breaking the program
+    print(f"ID {poke_id} not found in Honen data.")
+    return None  # Ensure None is returned instead of printing extra messages
 
 def get_poke_dict_by_name(name):
     name = name.strip().lower()
@@ -83,15 +83,15 @@ def display_pokemon_list(poke_list):
 def create_pokedex():
     global ownerRoot  # The BST root
 
-    # Get owner name exactly as entered
+    # Get owner name
     owner_name = input("Owner name: ").strip()
 
-    # Check if owner already exists (
+    # Check if owner already exists in BST
     if find_owner_bst(ownerRoot, owner_name.lower()) is not None:
         print(f"Owner '{owner_name}' already exists. No new Pokedex created.")
         return
 
-    # Ask for a starter Pokemon
+    # Ask for a starter Pokémon
     print("Choose your starter Pokemon:")
     print("1) Treecko")
     print("2) Torchic")
@@ -99,7 +99,8 @@ def create_pokedex():
 
     starter_choice = read_int_safe("Your choice: ")
 
-    # Map choice to Pokemon name & ID
+    # Map choice to Pokémon name & ID
+    starter_pokemon = None
     if starter_choice == 1:
         starter_pokemon = get_poke_dict_by_name("Treecko")
     elif starter_choice == 2:
@@ -110,16 +111,18 @@ def create_pokedex():
         print("Invalid choice. No Pokedex created.")
         return
 
+    # Create a new BST node for the owner with the chosen starter
     new_owner_node = create_owner_node(owner_name, starter_pokemon)
 
+    # Insert into the BST
     ownerRoot = insert_owner_bst(ownerRoot, new_owner_node)
 
     print(f"New Pokedex created for {owner_name} with starter {starter_pokemon['Name']}.")
 
 def create_owner_node(owner_name, first_pokemon=None):
     return {
-        "owner_lower": owner_name.lower(),  # Store lowercase version for comparison
-        "owner_original": owner_name,  # Keep original capitalization
+        "owner_lower": owner_name.lower(),  # Used for comparison
+        "owner_original": owner_name,  # Preserving the original format for printing
         "pokedex": [first_pokemon] if first_pokemon else [],
         "left": None,
         "right": None
@@ -127,20 +130,20 @@ def create_owner_node(owner_name, first_pokemon=None):
 
 def insert_owner_bst(root, new_node):
     if root is None:
-        return new_node  # If tree is empty, new node becomes root
+        return new_node  # Tree is empty → New node becomes root
 
     if new_node["owner_lower"] < root["owner_lower"]:
         root["left"] = insert_owner_bst(root["left"], new_node)
     elif new_node["owner_lower"] > root["owner_lower"]:
         root["right"] = insert_owner_bst(root["right"], new_node)
 
-    return root  # Return root
+    return root
 
 def find_owner_bst(root, owner_name):
     if root is None:
         return None
 
-    owner_name = owner_name.lower()  # Convert input to lowercase for searching
+    owner_name = owner_name.lower()  # Convert input to lowercase for comparison
 
     if owner_name < root["owner_lower"]:
         return find_owner_bst(root["left"], owner_name)
@@ -235,31 +238,29 @@ def post_order(root):
 
 def add_pokemon_to_owner(owner_node):
     poke_id = read_int_safe("Enter Pokemon ID to add: ")
-    pokemon = get_poke_dict_by_id(poke_id)
+    pokemon = get_poke_dict_by_id(poke_id)  # This already prints if not found
 
     if pokemon is None:
-        print("Invalid Pokemon ID.")
         return
 
     # Check for duplicates
     if any(p["ID"] == poke_id for p in owner_node["pokedex"]):
-        print("Pokemon already in the list. No changes made.")
+        print("Pokemon already in the list. No changes made.\n")
         return
 
     # Add to the end of the list
     owner_node["pokedex"].append(pokemon)
-    print(f"Pokemon {pokemon['Name']} (ID {pokemon['ID']}) added to {owner_node['owner'].capitalize()}'s Pokedex.")
-
+    print(f"Pokemon {pokemon['Name']} (ID {pokemon['ID']}) added to {owner_node['owner_original']}'s Pokedex.\n")
 def release_pokemon_by_name(owner_node):
     poke_name = input("Enter Pokemon Name to release: ").strip().lower()
 
     for i, poke in enumerate(owner_node["pokedex"]):
         if poke["Name"].lower() == poke_name:
             del owner_node["pokedex"][i]
-            print(f"Releasing {poke['Name']} from {owner_node['owner'].capitalize()}.")
+            print(f"Releasing {poke['Name']} from {owner_node['owner_original']}.")
             return
 
-    print(f"No Pokemon named '{poke_name.capitalize()}' in {owner_node['owner'].capitalize()}'s Pokedex.")
+    print(f"No Pokemon named '{poke_name.capitalize()}' in {owner_node['owner_original']}'s Pokedex.")
 
 def evolve_pokemon_by_name(owner_node):
     poke_name = input("Enter Pokemon Name to evolve: ").strip().lower()
@@ -276,12 +277,19 @@ def evolve_pokemon_by_name(owner_node):
                 print(f"{poke['Name']} has no further evolution.")
                 return
 
-            del owner_node["pokedex"][i]  # Remove old Pokémon
-            owner_node["pokedex"].append(evolved_pokemon)  # Add evolved Pokémon
-            print(f"{poke['Name']} evolved into {evolved_pokemon['Name']}!")
+            # Remove old Pokémon and add evolved Pokémon
+            del owner_node["pokedex"][i]
+
+            # If the evolved Pokémon is already present, release it immediately
+            if any(p["ID"] == evolved_pokemon["ID"] for p in owner_node["pokedex"]):
+                print(f"Pokemon evolved from {poke['Name']} (ID {poke['ID']}) to {evolved_pokemon['Name']} (ID {evolved_pokemon['ID']}).")
+                print(f"{evolved_pokemon['Name']} was already present; releasing it immediately.")
+            else:
+                owner_node["pokedex"].append(evolved_pokemon)
+                print(f"Pokemon evolved from {poke['Name']} (ID {poke['ID']}) to {evolved_pokemon['Name']} (ID {evolved_pokemon['ID']}).")
             return
 
-    print(f"No Pokemon named '{poke_name.capitalize()}' in {owner_node['owner'].capitalize()}'s Pokedex.")
+    print(f"No Pokemon named '{poke_name.capitalize()}' in {owner_node['owner_original']}'s Pokedex.")
 
 def delete_pokedex():
     global ownerRoot
@@ -310,34 +318,41 @@ def gather_all_owners(root, arr):
     arr.append(root)  # Store owner
     gather_all_owners(root["right"], arr)  # Visit right
 
+
 def sort_owners_by_num_pokemon():
     owners_list = []
     gather_all_owners(ownerRoot, owners_list)
-
-    # Sort by (#pokedex size ascending, then alphabetically ignoring case)
-    owners_list.sort(key=lambda x: (len(x["pokedex"]), x["owner_lower"]))
 
     if not owners_list:
         print("No owners at all.")
         return
 
-    # Print owners
+    # Sort first by Pokémon count, then by name (case-insensitive) using a simple bubble sort
+    n = len(owners_list)
+    for i in range(n):
+        for j in range(0, n - i - 1):
+            owner1 = owners_list[j]
+            owner2 = owners_list[j + 1]
+
+            if len(owner1["pokedex"]) > len(owner2["pokedex"]) or (
+                len(owner1["pokedex"]) == len(owner2["pokedex"]) and owner1["owner_lower"] > owner2["owner_lower"]
+            ):
+                owners_list[j], owners_list[j + 1] = owners_list[j + 1], owners_list[j]
+
     print("=== The Owners we have, sorted by number of Pokemons ===")
     for owner in owners_list:
-        print(f"Owner: {owner['owner_original']} (has {len(owner['pokedex'])} Pokemon)")
+        print(f"Owner: {owner['owner_original']} (has {len(owner['pokedex'])} Pokemon)\n")
 
 #######################
 # 6) Print All
 #######################
 
 def print_all_owners():
-    print("\n1) BFS")
+    print("1) BFS")
     print("2) Pre-Order")
     print("3) In-Order")
     print("4) Post-Order")
-    print("Your choice: ", end="")
-
-    choice = read_int_safe("")
+    choice = read_int_safe("Your choice: ")
 
     if choice == 1:
         bfs_traversal(ownerRoot)
@@ -347,18 +362,13 @@ def print_all_owners():
         in_order(ownerRoot)
     elif choice == 4:
         post_order(ownerRoot)
-    else:
-        print("Invalid input.")
-
-    # After printing, return to main menu
-    return
 
 def pre_order_print(node):
     if node is None:
         return
 
     # Print owner and their Pokemon
-    print(f"\nOwner: {node['owner'].capitalize()}")
+    print(f"\nOwner: {node['owner'].capitalize()}\n")
     if node["pokedex"]:
         display_pokemon_list(node["pokedex"])
     else:
@@ -375,7 +385,7 @@ def in_order_print(node):
     in_order_print(node["left"])
 
     # Print owner and their Pokémon
-    print(f"\nOwner: {node['owner'].capitalize()}")
+    print(f"\nOwner: {node['owner'].capitalize()}\n")
     if node["pokedex"]:
         display_pokemon_list(node["pokedex"])
     else:
@@ -391,7 +401,7 @@ def post_order_print(node):
     post_order_print(node["right"])
 
     # Print owner and their Pokémon
-    print(f"\nOwner: {node['owner'].capitalize()}")
+    print(f"\nOwner: {node['owner'].capitalize()}\n")
     if node["pokedex"]:
         display_pokemon_list(node["pokedex"])
     else:
@@ -453,16 +463,19 @@ def display_filter_sub_menu(owner_node):
 ########################
 # 8) Sub-menu & Main menu
 ########################
+def format_owner_name(name):
+    return " ".join([word.capitalize() for word in name.split()])
 def pokedex_menu(owner_node):
     while True:
-        print(f"\n-- {owner_node['owner'].capitalize()}'s Pokedex Menu --")
+        print(f"\n-- {owner_node['owner_original']}'s Pokedex Menu --")
         print("1. Add Pokemon")
         print("2. Display Pokedex")
         print("3. Release Pokemon")
         print("4. Evolve Pokemon")
         print("5. Back to Main")
+        print("Your choice:", end=" ")
 
-        choice = read_int_safe("Your choice: ")
+        choice = read_int_safe("")
 
         if choice == 1:
             add_pokemon_to_owner(owner_node)
