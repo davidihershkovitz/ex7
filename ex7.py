@@ -49,8 +49,10 @@ HOENN_DATA = read_hoenn_csv("hoenn_pokedex.csv")
 def read_int_safe(prompt):
     while True:
         user_input = input(prompt).strip()
-        if user_input.isdigit():  # Ensures only numeric input is accepted
+
+        if user_input.lstrip('-').isdigit():
             return int(user_input)
+
         print("Invalid input.")
 
 def get_poke_dict_by_id(poke_id):
@@ -58,7 +60,7 @@ def get_poke_dict_by_id(poke_id):
         if poke["ID"] == poke_id:
             return poke.copy()
     print(f"ID {poke_id} not found in Honen data.")
-    return None  # Ensure None is returned instead of printing extra messages
+    return None
 
 def get_poke_dict_by_name(name):
     name = name.strip().lower()
@@ -107,7 +109,7 @@ def create_pokedex():
     elif starter_choice == 3:
         starter_pokemon = get_poke_dict_by_name("Mudkip")
     else:
-        print("Invalid choice. No Pokedex created.")
+        print("Invalid. No Pokedex created.")
         return
 
     # Create a new BST node for the owner with the chosen starter
@@ -350,6 +352,11 @@ def sort_owners_by_num_pokemon():
 #######################
 
 def print_all_owners():
+    global ownerRoot
+    if ownerRoot is None:
+        print("No owners in the BST.")
+        return  # Exit back to the main menu immediately
+
     print("1) BFS")
     print("2) Pre-Order")
     print("3) In-Order")
@@ -367,6 +374,8 @@ def print_all_owners():
         in_order(ownerRoot)
     elif choice == 4:
         post_order(ownerRoot)
+    else:
+        print("Invalid choice.")
 
 def pre_order_print(node):
     if node is None:
@@ -442,11 +451,11 @@ def display_filter_sub_menu(owner_node):
         elif choice == 2:
             filtered = [p for p in owner_node["pokedex"] if p["Can Evolve"] == "TRUE"]
         elif choice == 3:
-            attack_threshold = read_int_allow_negative("Enter Attack threshold: ")  # Now supports negatives
-            filtered = [p for p in owner_node["pokedex"] if p["Attack"] >= attack_threshold]  # Includes 0
+            attack_threshold = read_int_allow_negative("Enter Attack threshold: ")
+            filtered = [p for p in owner_node["pokedex"] if p["Attack"] >= attack_threshold]
         elif choice == 4:
-            hp_threshold = read_int_allow_negative("Enter HP threshold: ")  # Now supports negatives
-            filtered = [p for p in owner_node["pokedex"] if p["HP"] >= hp_threshold]  # Includes 0
+            hp_threshold = read_int_allow_negative("Enter HP threshold: ")
+            filtered = [p for p in owner_node["pokedex"] if p["HP"] >= hp_threshold]
         elif choice == 5:
             prefix = input("Starting letter(s): ").strip().lower()
             filtered = [p for p in owner_node["pokedex"] if p["Name"].lower().startswith(prefix)]
@@ -483,12 +492,11 @@ def pokedex_menu(owner_node):
             choice = input("Your choice: ").strip()
 
             try:
-                choice = int(choice)  # ✅ Try converting input to an integer
-                break  # ✅ If successful, break out of the loop
+                choice = int(choice)
+                break
             except ValueError:
-                print("Invalid input.")  # ✅ Only for non-numeric input (e.g., "abc", "$$")
-
-        if choice < 0:  # ✅ Treat negative numbers as "Invalid choice."
+                print("Invalid input.")
+        if choice < 0:
             print("Invalid choice.")
         elif choice == 1:
             add_pokemon_to_owner(owner_node)
@@ -499,10 +507,10 @@ def pokedex_menu(owner_node):
         elif choice == 4:
             evolve_pokemon_by_name(owner_node)
         elif choice == 5:
-            print("Back to Main Menu.")  # ✅ Ensures correct message before returning
+            print("Back to Main Menu.")
             return
         else:
-            print("Invalid choice.")  # ✅ Handles numbers outside 1-5
+            print("Invalid choice.")
 
 def existing_pokedex():
     global ownerRoot
@@ -520,8 +528,8 @@ def existing_pokedex():
     # Owner found - Show Pokedex menu
     pokedex_menu(owner_node)
 
+
 def main_menu():
-    # main menu func
     while True:
         print("\n=== Main Menu ===")
         print("1. New Pokedex")
@@ -533,21 +541,23 @@ def main_menu():
 
         choice = read_int_safe("Your choice: ")
 
+        if choice < 1 or choice > 6:
+            print("Invalid choice.")
+            continue
+
         if choice == 1:
-             create_pokedex()
+            create_pokedex()
         elif choice == 2:
             existing_pokedex()
         elif choice == 3:
-             delete_pokedex()
+            delete_pokedex()
         elif choice == 4:
             sort_owners_by_num_pokemon()
         elif choice == 5:
             print_all_owners()
         elif choice == 6:
             print("Goodbye!")
-            break
-        else:
-            print("Invalid choice.")
+            break  # Exit the loop and end the program
 
 def main():
     main_menu()
