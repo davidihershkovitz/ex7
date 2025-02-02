@@ -467,7 +467,7 @@ def display_filter_sub_menu(owner_node):
         if filtered:
             display_pokemon_list(filtered)
         else:
-            print("There are no Pokémon in this Pokedex that match the criteria.")
+            print("There are no Pokemon in this Pokedex that match the criteria.")
 ########################
 # 8) Sub-menu & Main menu
 ########################
