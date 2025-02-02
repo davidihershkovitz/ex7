@@ -295,16 +295,21 @@ def delete_pokedex():
     global ownerRoot
 
     # Get owner name (case insensitive)
-    owner_name = input("Enter owner to delete: ").strip().lower()
+    owner_name = input("Enter owner to delete: ").strip()
 
-    # Check if the owner exists in BST
-    if find_owner_bst(ownerRoot, owner_name) is None:
+    # Find the owner with the correct casing
+    owner_node = find_owner_bst(ownerRoot, owner_name.lower())
+
+    if owner_node is None:
         print(f"Owner '{owner_name}' not found.")
         return
 
+    # Use the original name casing
+    original_name = owner_node["owner_original"]
+
     # Delete the owner from BST
-    ownerRoot = delete_owner_bst(ownerRoot, owner_name)
-    print(f"Deleting {owner_name.capitalize()}'s entire Pokedex...\nPokedex deleted.")
+    ownerRoot = delete_owner_bst(ownerRoot, owner_name.lower())
+    print(f"Deleting {original_name}'s entire Pokedex...\nPokedex deleted.")
 
 ########################
 # 5) Sorting Owners by # of Pokemon
@@ -352,7 +357,10 @@ def print_all_owners():
     print("2) Pre-Order")
     print("3) In-Order")
     print("4) Post-Order")
+
     choice = read_int_safe("Your choice: ")
+
+    print()
 
     if choice == 1:
         bfs_traversal(ownerRoot)
