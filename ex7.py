@@ -440,11 +440,25 @@ def display_filter_sub_menu(owner_node):
             filtered = [p for p in owner_node["pokedex"] if p["Can Evolve"] == "TRUE"]
 
         elif choice == 3:
-            attack_threshold = read_int_safe("Enter Attack threshold: ")
+            while True:
+                attack_threshold = input("Enter Attack threshold: ").strip()
+
+                if attack_threshold.isdigit():
+                    attack_threshold = int(attack_threshold)
+                    break
+
+                print("Invalid input.")
             filtered = [p for p in owner_node["pokedex"] if p["Attack"] > attack_threshold]
 
         elif choice == 4:
-            hp_threshold = read_int_safe("Enter HP threshold: ")
+            while True:
+                hp_threshold = input("Enter HP threshold: ").strip()
+
+                if hp_threshold.isdigit():
+                    hp_threshold = int(hp_threshold)
+                    break
+
+                print("Invalid input.")
             filtered = [p for p in owner_node["pokedex"] if p["HP"] > hp_threshold]
 
         elif choice == 5:
