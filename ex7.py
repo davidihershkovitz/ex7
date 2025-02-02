@@ -49,7 +49,7 @@ HOENN_DATA = read_hoenn_csv("hoenn_pokedex.csv")
 def read_int_safe(prompt):
     while True:
         user_input = input(prompt).strip()
-        if user_input.isdigit():
+        if user_input.isdigit():  # Ensures only numeric input is accepted
             return int(user_input)
         print("Invalid input.")
 
@@ -208,7 +208,7 @@ def pre_order(root):
     if root is None:
         return
 
-    print(f"Owner: {root['owner_original']}")  # Preserve original capitalization
+    print(f"\nOwner: {root['owner_original']}")  # Preserve original capitalization
     display_pokemon_list(root["pokedex"])
 
     pre_order(root["left"])
@@ -219,7 +219,7 @@ def in_order(root):
         return
 
     in_order(root["left"])
-    print(f"Owner: {root['owner_original']}")  # Preserve original capitalization
+    print(f"\nOwner: {root['owner_original']}")  # Preserve original capitalization
     display_pokemon_list(root["pokedex"])
     in_order(root["right"])
 
@@ -229,7 +229,7 @@ def post_order(root):
 
     post_order(root["left"])
     post_order(root["right"])
-    print(f"Owner: {root['owner_original']}")  # Preserve original capitalization
+    print(f"\nOwner: {root['owner_original']}")  # Preserve original capitalization
     display_pokemon_list(root["pokedex"])
 
 ########################
@@ -465,6 +465,8 @@ def display_filter_sub_menu(owner_node):
 ########################
 def format_owner_name(name):
     return " ".join([word.capitalize() for word in name.split()])
+
+
 def pokedex_menu(owner_node):
     while True:
         print(f"\n-- {owner_node['owner_original']}'s Pokedex Menu --")
@@ -473,9 +475,13 @@ def pokedex_menu(owner_node):
         print("3. Release Pokemon")
         print("4. Evolve Pokemon")
         print("5. Back to Main")
-        print("Your choice:", end=" ")
 
-        choice = read_int_safe("")
+        while True:  # Keep asking until a valid integer is entered
+            choice = input("Your choice: ").strip()
+            if choice.isdigit():  # If it's a valid number
+                choice = int(choice)
+                break
+            print("Invalid input.")  # ✅ Only re-prompts, doesn't print menu again
 
         if choice == 1:
             add_pokemon_to_owner(owner_node)
@@ -486,10 +492,10 @@ def pokedex_menu(owner_node):
         elif choice == 4:
             evolve_pokemon_by_name(owner_node)
         elif choice == 5:
-            print("Back to Main Menu.")
+            print("Back to Main Menu.")  # ✅ Ensures it prints before returning
             return
         else:
-            print("Invalid choice.")
+            print("Invalid choice.")  # ✅ Only for numbers out of range (menu reprints)
 
 def existing_pokedex():
     global ownerRoot
