@@ -417,6 +417,15 @@ def post_order_print(node):
 ########################
 # 7) The Display Filter Sub-Menu
 ########################
+def read_int_allow_negative(prompt):
+    while True:
+        user_input = input(prompt).strip()
+
+        # Ensure input is a valid integer
+        if user_input.lstrip('-').isdigit():
+            return int(user_input)
+
+        print("Invalid input.")
 
 def display_filter_sub_menu(owner_node):
     """ Display Pokémon based on filter criteria. """
@@ -435,52 +444,30 @@ def display_filter_sub_menu(owner_node):
         if choice == 1:
             poke_type = input("Which Type? (e.g. GRASS, WATER): ").strip().lower()
             filtered = [p for p in owner_node["pokedex"] if p["Type"].lower() == poke_type]
-
         elif choice == 2:
             filtered = [p for p in owner_node["pokedex"] if p["Can Evolve"] == "TRUE"]
-
         elif choice == 3:
-            while True:
-                attack_threshold = input("Enter Attack threshold: ").strip()
-
-                if attack_threshold.isdigit():
-                    attack_threshold = int(attack_threshold)
-                    break
-
-                print("Invalid input.")
-            filtered = [p for p in owner_node["pokedex"] if p["Attack"] > attack_threshold]
-
+            attack_threshold = read_int_allow_negative("Enter Attack threshold: ")  # Now supports negatives
+            filtered = [p for p in owner_node["pokedex"] if p["Attack"] >= attack_threshold]  # Includes 0
         elif choice == 4:
-            while True:
-                hp_threshold = input("Enter HP threshold: ").strip()
-
-                if hp_threshold.isdigit():
-                    hp_threshold = int(hp_threshold)
-                    break
-
-                print("Invalid input.")
-            filtered = [p for p in owner_node["pokedex"] if p["HP"] > hp_threshold]
-
+            hp_threshold = read_int_allow_negative("Enter HP threshold: ")  # Now supports negatives
+            filtered = [p for p in owner_node["pokedex"] if p["HP"] >= hp_threshold]  # Includes 0
         elif choice == 5:
             prefix = input("Starting letter(s): ").strip().lower()
             filtered = [p for p in owner_node["pokedex"] if p["Name"].lower().startswith(prefix)]
-
         elif choice == 6:
             filtered = owner_node["pokedex"]  # Show all
-
         elif choice == 7:
             print("Back to Pokedex Menu.")
             return
-
         else:
-            print("Invalid choice. Try again.")
+            print("Invalid choice.")
             continue
 
         if filtered:
             display_pokemon_list(filtered)
         else:
-            print("There are no Pokemons in this Pokedex that match the criteria.")
-
+            print("There are no Pokémon in this Pokedex that match the criteria.")
 ########################
 # 8) Sub-menu & Main menu
 ########################
