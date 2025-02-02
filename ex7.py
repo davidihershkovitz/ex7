@@ -252,16 +252,15 @@ def add_pokemon_to_owner(owner_node):
     owner_node["pokedex"].append(pokemon)
     print(f"Pokemon {pokemon['Name']} (ID {pokemon['ID']}) added to {owner_node['owner_original']}'s Pokedex.\n")
 def release_pokemon_by_name(owner_node):
-    poke_name = input("Enter Pokemon Name to release: ").strip().lower()
+    poke_name = input("Enter Pokemon Name to release: ").strip().lower()  # ✅ Convert input to lowercase
 
-    for i, poke in enumerate(owner_node["pokedex"]):
-        if poke["Name"].lower() == poke_name:
+    for i, pokemon in enumerate(owner_node["pokedex"]):
+        if pokemon["Name"].lower() == poke_name:  # ✅ Compare case-insensitively
+            print(f"Releasing {pokemon['Name']} from {owner_node['owner_original']}.")
             del owner_node["pokedex"][i]
-            print(f"Releasing {poke['Name']} from {owner_node['owner_original']}.")
             return
 
-    print(f"No Pokemon named '{poke_name.capitalize()}' in {owner_node['owner_original']}'s Pokedex.")
-
+    print(f"No Pokemon named '{poke_name}' in {owner_node['owner_original']}'s Pokedex.")  # ✅ Ensures lowercase input
 def evolve_pokemon_by_name(owner_node):
     poke_name = input("Enter Pokemon Name to evolve: ").strip().lower()
 
@@ -289,7 +288,7 @@ def evolve_pokemon_by_name(owner_node):
                 print(f"Pokemon evolved from {poke['Name']} (ID {poke['ID']}) to {evolved_pokemon['Name']} (ID {evolved_pokemon['ID']}).")
             return
 
-    print(f"No Pokemon named '{poke_name.capitalize()}' in {owner_node['owner_original']}'s Pokedex.")
+    print(f"No Pokemon named '{poke_name}' in {owner_node['owner_original']}'s Pokedex.")
 
 def delete_pokedex():
     global ownerRoot
@@ -486,12 +485,16 @@ def pokedex_menu(owner_node):
 
         while True:  # Keep asking until a valid integer is entered
             choice = input("Your choice: ").strip()
-            if choice.isdigit():  # If it's a valid number
-                choice = int(choice)
-                break
-            print("Invalid input.")  # ✅ Only re-prompts, doesn't print menu again
 
-        if choice == 1:
+            try:
+                choice = int(choice)  # ✅ Try converting input to an integer
+                break  # ✅ If successful, break out of the loop
+            except ValueError:
+                print("Invalid input.")  # ✅ Only for non-numeric input (e.g., "abc", "$$")
+
+        if choice < 0:  # ✅ Treat negative numbers as "Invalid choice."
+            print("Invalid choice.")
+        elif choice == 1:
             add_pokemon_to_owner(owner_node)
         elif choice == 2:
             display_filter_sub_menu(owner_node)
@@ -500,10 +503,10 @@ def pokedex_menu(owner_node):
         elif choice == 4:
             evolve_pokemon_by_name(owner_node)
         elif choice == 5:
-            print("Back to Main Menu.")  # ✅ Ensures it prints before returning
+            print("Back to Main Menu.")  # ✅ Ensures correct message before returning
             return
         else:
-            print("Invalid choice.")  # ✅ Only for numbers out of range (menu reprints)
+            print("Invalid choice.")  # ✅ Handles numbers outside 1-5
 
 def existing_pokedex():
     global ownerRoot
